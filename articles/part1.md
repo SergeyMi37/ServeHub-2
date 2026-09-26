@@ -1,4 +1,4 @@
-
+> Часть кода может быть устаревшей, но общая структура такая же
 # Своя self-hosted двухсерверная VPN-архитектура. Подробный путь разработки и ошибки, с которыми вы можете столкнуться
 
 Всё началось с того, что меня перестал устраивать мой подход к развертыванию личных сервисов. Я решил переписать всё с нуля. К тому же это был отличный повод получить новые навыки и попробовать инструменты, до которых давно не доходили руки.
@@ -287,7 +287,7 @@ server {
         condition: service_healthy
     environment:
       - POSTGRES_HOST=nextcloud-db
-      - POSTGRES_DB=${POSTGRES_DB_NEXTCLOUD}
+      - POSTGRES_DB=nextcloud
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - NEXTCLOUD_ADMIN_USER=${ADMIN_USER}

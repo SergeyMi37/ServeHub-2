@@ -169,13 +169,12 @@ const SECRETS_FIELD_MAP = {
     vps_main_interface: "vps_interface",
     server_name: 'sec_server_name',
     admin_user: 'sec_admin_user',
+    hbox_pepper: 'sec_hbox_pepper',
     admin_password: 'sec_admin_pass',
     email: 'sec_email',
     telegram_token: 'sec_tg_token',
     telegram_chat_id: 'sec_tg_chat_id',
     webnames_apikey: 'sec_webnames',
-    postgres_db_nextcloud: 'sec_pg_nc',
-    postgres_db_vaultwarden: 'sec_pg_vw',
     postgres_user: 'sec_pg_user',
     postgres_password: 'sec_pg_pass',
     nextcloud_redis_pass: 'sec_redis_pass',
@@ -247,6 +246,7 @@ window.generateAndReviewYaml = function() {
     const localIp = document.getElementById('sec_local_ip').value;
     const localUser = document.getElementById('sec_local_user').value;
     const localRootPass = document.getElementById('sec_local_root_pass').value;
+    const hboxPepper = document.getElementById('sec_hbox_pepper').value;
     
     const serverName = document.getElementById('sec_server_name').value;
     const adminUser = document.getElementById('sec_admin_user').value;
@@ -257,8 +257,6 @@ window.generateAndReviewYaml = function() {
     const tgChatId = document.getElementById('sec_tg_chat_id').value;
     const webnamesKey = document.getElementById('sec_webnames').value;
     
-    const pgNc = document.getElementById('sec_pg_nc').value;
-    const pgVw = document.getElementById('sec_pg_vw').value;
     const pgUser = document.getElementById('sec_pg_user').value;
     const pgPass = document.getElementById('sec_pg_pass').value;
     const redisPass = document.getElementById('sec_redis_pass').value;
@@ -312,8 +310,6 @@ webnames_apikey: "${webnamesKey}"
 # ------------------------------------------------------------------------------
 # 5. НАСТРОЙКИ СУБД POSTGRESQL
 # ------------------------------------------------------------------------------
-postgres_db_nextcloud: "${pgNc}"
-postgres_db_vaultwarden: "${pgVw}"
 postgres_user: "${pgUser}"
 postgres_password: "${pgPass}"
 nextcloud_redis_pass: "${redisPass}"
@@ -322,6 +318,7 @@ nextcloud_redis_pass: "${redisPass}"
 # 6. СЕКРЕТЫ И КЛЮЧИ БЕЗОПАСНОСТИ СЕРВИСОВ
 # ------------------------------------------------------------------------------
 secret_vaultwarden_password: "${vwAdminPass}"
+hbox_pepper: "${hboxPepper}"
 ssh_public_key: "${publicsshKey}"
 ssh_private_key: |
 ${formattedPrivateKey}

@@ -38,6 +38,8 @@ services:
         condition: service_healthy
       borg-ui:
         condition: service_started
+      homebox:
+        condition: service_started
       gitea:
         condition: service_started
     deploy:
@@ -115,7 +117,7 @@ services:
     volumes:
       - ./apps-data/postgres/nextcloud:/var/lib/postgresql
     environment:
-      - POSTGRES_DB=${POSTGRES_DB_NEXTCLOUD}
+      - POSTGRES_DB=nextcloud
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     expose:
@@ -155,7 +157,7 @@ services:
         condition: service_started
     environment:
       - POSTGRES_HOST=nextcloud-db
-      - POSTGRES_DB=${POSTGRES_DB_NEXTCLOUD}
+      - POSTGRES_DB=nextcloud
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - NEXTCLOUD_ADMIN_USER=${ADMIN_USER}
@@ -218,7 +220,7 @@ services:
     volumes:
       - ./apps-data/postgres/vaultwarden:/var/lib/postgresql
     environment:
-      - POSTGRES_DB=${POSTGRES_DB_VAULTWARDEN}
+      - POSTGRES_DB=vaultwarden
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     expose:
@@ -244,7 +246,7 @@ services:
       vaultwarden-db:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@vaultwarden-db:5432/${POSTGRES_DB_VAULTWARDEN}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@vaultwarden-db:5432/vaultwarden
       - DOMAIN=https://${SERVER_NAME}/vaultwarden
       - SIGNUPS_ALLOWED=true
       - WEBSOCKET_ENABLED=true
@@ -552,3 +554,52 @@ services:
       resources:
         limits:
           memory: 1G
+
+  homebox-db:
+    image: postgres:18
+    container_name: homebox-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=homebox
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - ./apps-data/postgres/homebox:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  homebox:
+    image: ghcr.io/sysadminsmedia/homebox:latest
+    container_name: homebox
+    restart: unless-stopped
+    ports:
+      - "7745:7745"
+    environment:
+      - HBOX_MODE=production
+      - HBOX_WEB_PORT=7745
+      - HBOX_OPTIONS_ALLOW_REGISTRATION=true
+      - HBOX_DATABASE_DRIVER=postgres
+      - HBOX_DATABASE_HOST=homebox-db
+      - HBOX_DATABASE_PORT=5432
+      - HBOX_DATABASE_DATABASE=homebox
+      - HBOX_DATABASE_USERNAME=${POSTGRES_USER}
+      - HBOX_DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - HBOX_DATABASE_SSL_MODE=disable
+      - HBOX_OPTIONS_ALLOW_ANALYTICS=false
+      - HBOX_AUTH_API_KEY_PEPPER=${HBOX_PEPPER}
+    volumes:
+      - ./apps-data/homebox:/data
+    depends_on:
+      homebox-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M

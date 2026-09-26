@@ -23,7 +23,10 @@
         icon: mdi-controller-classic
         href: /habitica/
         description: Геймифицированный трекер привычек
-
+    - Homebox:
+        icon: si-hackthebox
+        href: /homebox
+        description: "Учет вещей и оборудования"
 - 🛠️ Другие инструменты:
     - Borg UI:
         icon: mdi-backup-restore

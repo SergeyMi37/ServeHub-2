@@ -1,3 +1,5 @@
+> Часть кода может быть устаревшей, но общая структура такая же
+
 # ЧАСТЬ 2. Своя self-hosted двухсерверная VPN-архитектура: Gitea, сборка Amnezia, проблемы 7.1.3-arch1-2 и многое другое
 
 Эта статья является прямым продолжением, которое охватывает релиз 1.4.0 и отчасти 2.0.0, 2.1.0 (а также определенные подробности, которые не упоминались в прошлой статье). Здесь будут подробно объясняться моменты в том порядке, в котором они появлялись в проекте.
@@ -224,7 +226,7 @@ nextcloud-db:
     volumes:
       - ./apps-data/postgres/nextcloud:/var/lib/postgresql
     environment:
-      - POSTGRES_DB=${POSTGRES_DB_NEXTCLOUD}
+      - POSTGRES_DB=nextcloud
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     expose:

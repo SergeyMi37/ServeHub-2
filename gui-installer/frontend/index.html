@@ -188,14 +188,6 @@
 
                     <div class="form-section-title">5. Настройки СУБД PostgreSQL и Redis</div>
                     <div class="form-group">
-                        <label>Имя БД Nextcloud:</label>
-                        <input type="text" id="sec_pg_nc" value="nextcloud">
-                    </div>
-                    <div class="form-group">
-                        <label>Имя БД Vaultwarden:</label>
-                        <input type="text" id="sec_pg_vw" value="vaultwarden">
-                    </div>
-                    <div class="form-group">
                         <label>Суперпользователь Postgres:</label>
                         <input type="text" id="sec_pg_user" value="postgres_master">
                     </div>
@@ -217,6 +209,12 @@
                         <label>Пароль админ-панели Vaultwarden:</label>
                         <div class="password-wrapper">
                             <input type="text" id="sec_vw_admin_pass" value="vaultwarden_admin_panel_secure_password">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Homebox ключ:</label>
+                        <div class="password-wrapper">
+                            <input type="text" id="sec_hbox_pepper" value="hbox_key_pepper">
                         </div>
                     </div>
                     <div class="form-group">
