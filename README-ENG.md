@@ -20,6 +20,7 @@ It is worth clarifying that hosting everything on one powerful VPS would be easi
 ## Main Services
 - **Nextcloud:** Cloud storage for files, contacts, and photos.
 - **Vaultwarden:** Lightweight password manager (Bitwarden API compatible) for storing encrypted data.
+- **Homebox:** Inventory of Items and Equipment
 - **Gitea:** Lightweight Git-based version control system.
 - **Navidrome:** Personal music collection streaming.
 - **Audiobookshelf:** Server for audiobooks and podcasts with progress synchronization.
