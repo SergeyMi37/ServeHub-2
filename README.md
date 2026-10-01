@@ -109,11 +109,15 @@
 
 Исполняемый файл `gui-installer` (или `gui-installer.exe`) будет сохранен в папке `gui-installer/build/bin/`.
 
-## 3. Сборка AppImage (только для Linux)
-1. Вернитесь в корень проекта.
-2. Выполните скрипт автоматической упаковки:
-   ```bash
-   ./scripts/build_appimage.sh
-   ```
+## 3. Сборка .deb пакета (Linux)
+1. Находясь в корне проекта, запустите bash-скрипт: 
+```bash
+./scripts/build_deb.sh
+```
 
-Готовый пакет `ServeHub-Installer-x86_64.AppImage` будет сохранен в папке `gui-installer/build/bin/`.
+2. Установка собранного пакета:
+```bash
+sudo apt install ./gui-installer/build/bin/servehub-installer.deb
+```
+
+Готовый пакет servehub-installer.deb будет сохранен в папке gui-installer/build/bin/.
