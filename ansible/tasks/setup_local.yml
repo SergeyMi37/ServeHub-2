@@ -392,3 +392,46 @@
 - name: "[Status] 📊 ТЕКУЩИЙ СТАТУС ЗАПУЩЕННЫХ СЕРВИСОВ 📊"
   ansible.builtin.debug:
     var: compose_ps_output.stdout_lines
+
+# =========================================================================
+# 7. НАСТРОЙКА DNS ДЛЯ ИНТЕРФЕЙСА AWG0
+# =========================================================================
+- name: "[Network] Гарантия работы systemd-resolved для resolvectl"
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    enabled: yes
+    state: started
+
+- name: "[Network] Создание systemd-сервиса amnezia-dns для настройки DNS интерфейса awg0"
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/amnezia-dns.service
+    content: |
+      [Unit]
+      Description=Fix Amnezia DNS for awg0
+      After=docker.service
+      BindsTo=docker.service
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      ExecStartPre=/bin/sh -c 'until ip link show awg0; do sleep 1; done'
+      ExecStart=/usr/bin/resolvectl dns awg0 10.8.0.1
+      ExecStartPost=/usr/bin/resolvectl domain awg0 ~.
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: "0644"
+  register: amnezia_dns_service
+
+- name: "[Network] Перезагрузка daemon systemd при изменении конфига сервиса DNS"
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  when: amnezia_dns_service.changed
+
+- name: "[Network] Включение и запуск системного сервиса amnezia-dns"
+  ansible.builtin.systemd:
+    name: amnezia-dns.service
+    enabled: yes
+    state: started

@@ -91,10 +91,9 @@ Hermes разворачивается отдельно от основных к�
 1. Установите Docker + Docker Compose
 2. Установите [amneziawg-dkms](https://github.com/amnezia-vpn/amneziawg-linux-kernel-module)
 3. git clone https://github.com/canntstand/ServeHub-2
-4. В wg-easy на удаленном сервере создайте конфиг для нового клиента и поместите в папку ./apps-data/amnezia
-5. docker compose -f docker-compose.hermes.yaml up -d
-6. Выполнить команды ниже
-    ```
+4. В wg-easy на удаленном сервере создайте конфиг для нового клиента и поместите по пути `./apps-data/amnezia/awg0.conf`.
+5. Выполнить команды ниже
+    ```bash
     cat > /etc/sysctl.d/99-servehub-vpn.conf <<'EOF'
     net.ipv4.ip_forward=1
     net.ipv4.conf.all.src_valid_mark=1
@@ -105,7 +104,30 @@ Hermes разворачивается отдельно от основных к�
 
     sysctl --system
     ```
-7. Установка Hermes Agent стандартным способом ([официальный сайт](https://hermes-agent.nousresearch.com/))
+6. Запустите VPN клиент:
+    ```bash
+    docker compose -f docker-compose.hermes.yaml up -d
+    ```
+7. Настройте DNS для awg0 интерфейса:
+    ```bash
+    cat << 'EOF' | sudo tee /etc/systemd/system/amnezia-dns.service > /dev/null && sudo systemctl daemon-reload && sudo systemctl enable --now amnezia-dns.service
+    [Unit]
+    Description=Fix Amnezia DNS for awg0
+    After=docker.service
+    BindsTo=docker.service
+
+    [Service]
+    Type=oneshot
+    RemainAfterExit=yes
+    ExecStartPre=/bin/sh -c 'until ip link show awg0; do sleep 1; done'
+    ExecStart=/usr/bin/resolvectl dns awg0 10.8.0.1
+    ExecStartPost=/usr/bin/resolvectl domain awg0 ~.
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+    ```
+8. Установка Hermes Agent стандартным способом ([официальный сайт](https://hermes-agent.nousresearch.com/))
 
 # Важная информация перед развертыванием проекта
 1. **Поддерживаемые ОС:** Проект рассчитан на работу на Ubuntu, Debian, Arch Linux (как минимум 7.1.8-arch1-3).
@@ -115,7 +137,6 @@ Hermes разворачивается отдельно от основных к�
 5. **Настройка wg-easy:** Если нет подключения к VPN, то можно попробовать зайти в интерфейс wg-easy и настроить параметры. (Подробнее можно прочитать в [AmneziaWG documentation](https://docs.amnezia.org/documentation/amnezia-wg).)
 6. **Ошибки при выполнении Ansible плейбука:** Во время выполнения в самом начале могут появиться ошибки при подключении под root. Если скрипт при этом не завершился и развёртывание происходит на серверах, где уже есть пользователи, указанные в `secrets.yml`, — это нормально. В таком случае скрипт должен подключиться под созданными пользователями.
 7. **Гарантия работы:** Работа проекта гарантируется только на полностью чистых серверах, либо если сервер уже был настроен с помощью этого проекта. В ином случае гарантии работы нет. Также не гарантируется работа при проблемах с подключением.
-8. **Если DNS запросы локального сервера не отображаются в AdGuardHome:** Нужно выполнить `echo "nameserver 10.8.0.1" | sudo tee /etc/resolv.conf && sudo chattr +i /etc/resolv.conf`.
 
 # Тестирование с Vagrant
 1. Установите:

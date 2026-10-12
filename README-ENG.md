@@ -90,14 +90,8 @@ Hermes's VPN access should be restricted to the IP addresses and ports it actual
    git clone https://github.com/canntstand/ServeHub-2
    ```
 
-4. In wg-easy on the remote server, create a configuration for a new client and place it in `./apps-data/amnezia`.
-5. Start the VPN client:
-
-   ```bash
-   docker compose -f docker-compose.hermes.yaml up -d
-   ```
-
-6. Apply the following kernel settings:
+4. In wg-easy on the remote server, create a configuration for a new client and place it in `./apps-data/amnezia/awg0.conf`.
+5. Apply the following kernel settings:
 
    ```bash
    cat > /etc/sysctl.d/99-servehub-vpn.conf <<'EOF'
@@ -110,8 +104,31 @@ Hermes's VPN access should be restricted to the IP addresses and ports it actual
 
    sysctl --system
    ```
+6. Start the VPN client:
 
-7. Install Hermes Agent using the standard procedure described on the [official website](https://hermes-agent.nousresearch.com/).
+   ```bash
+   docker compose -f docker-compose.hermes.yaml up -d
+   ```
+7. Configure DNS for awg0 interface:
+    ```bash
+    cat << 'EOF' | sudo tee /etc/systemd/system/amnezia-dns.service > /dev/null && sudo systemctl daemon-reload && sudo systemctl enable --now amnezia-dns.service
+    [Unit]
+    Description=Fix Amnezia DNS for awg0
+    After=docker.service
+    BindsTo=docker.service
+
+    [Service]
+    Type=oneshot
+    RemainAfterExit=yes
+    ExecStartPre=/bin/sh -c 'until ip link show awg0; do sleep 1; done'
+    ExecStart=/usr/bin/resolvectl dns awg0 10.8.0.1
+    ExecStartPost=/usr/bin/resolvectl domain awg0 ~.
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+    ```
+8. Install Hermes Agent using the standard procedure described on the [official website](https://hermes-agent.nousresearch.com/).
 
 # Important Information Before Deployment
 1. **Supported OS:** The project is designed to run on Ubuntu, Debian, and Arch Linux (7.1.3-arch1-2).
@@ -121,7 +138,6 @@ Hermes's VPN access should be restricted to the IP addresses and ports it actual
 5. **wg-easy Configuration:** If there is no connection to the VPN, try accessing the wg-easy interface to adjust settings. (Read more in the [AmneziaWG documentation](https://docs.amnezia.org/documentation/amnezia-wg)).
 6. **Ansible Playbook Errors:** At the beginning of execution, errors might appear when connecting as `root`. If the script does not terminate and deployment is happening on servers that already contain the users specified in `secrets.yml`, this is normal. In this case, the script should proceed by connecting as the created users.
 7. **Reliability Guarantee:** The project's functionality is only guaranteed on completely clean servers, or servers already configured using this project. Otherwise, operation is not guaranteed. Functionality is also not guaranteed in the event of connection issues.
-8. **If DNS requests from the local server can't be seen in AdGuardHome:** You need to do the following: `echo "nameserver 10.8.0.1" | sudo tee /etc/resolv.conf && sudo chattr +i /etc/resolv.conf`.
 
 # Testing with Vagrant
 1. Install:
