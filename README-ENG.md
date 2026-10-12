@@ -4,10 +4,11 @@
 ![Last Commit](https://img.shields.io/github/last-commit/canntstand/ServeHub-2)
 ![Stars](https://img.shields.io/github/stars/canntstand/ServeHub-2?style=social)
 
-- [README Russian version](https://github.com/canntstand/ServeHub-2/blob/main/README.md)
+- [README Russian version](README.md)
 
 # Table of Contents
 - [Brief Overview](#brief-overview)
+- [Hermes Agent (optional)](#hermes-agent-optional)
 - [Main dependencies](#main-dependencies)
 - [Important Information Before Deployment](#important-information-before-deployment)
 - [Testing with Vagrant](#testing-with-vagrant)
@@ -67,6 +68,51 @@ It is worth clarifying that hosting everything on one powerful VPS would be easi
 - **[Docker Compose](https://docs.docker.com/compose/install/)**
 - **SSH**
 
+# Hermes Agent (Optional)
+Hermes Agent can be deployed as an optional third server in ServeHub-2. It is an AI agent designed to automate everyday tasks and interact with infrastructure.
+
+Possible use cases:
+- **Monitoring and diagnostics:** analyzing server metrics and logs, generating reports, and sending notifications to Telegram.
+- **Gitea integration:** interacting with repositories (for example, my Obsidian vault), reviewing changes, and assisting with development.
+- **Automation:** running scheduled tasks and interacting with external service APIs, such as Habitica.
+
+Hermes is deployed separately from the core ServeHub-2 components and is not required for the project to function. It can run on a separate VPS connected to the existing VPN network as an independent client. This allows it to interact with Gitea and other internal services without running the agent on the main server.
+
+Hermes's VPN access should be restricted to the IP addresses and ports it actually needs. Connecting to the VPN should not grant the agent unrestricted access to all devices and services.
+
+## Setting Up the Server and Installing Hermes Agent
+
+1. Install Docker and Docker Compose.
+2. Install [amneziawg-dkms](https://github.com/amnezia-vpn/amneziawg-linux-kernel-module).
+3. Clone the repository:
+
+   ```bash
+   git clone https://github.com/canntstand/ServeHub-2
+   ```
+
+4. In wg-easy on the remote server, create a configuration for a new client and place it in `./apps-data/amnezia`.
+5. Start the VPN client:
+
+   ```bash
+   docker compose -f docker-compose.hermes.yaml up -d
+   ```
+
+6. Apply the following kernel settings:
+
+   ```bash
+   cat > /etc/sysctl.d/99-servehub-vpn.conf <<'EOF'
+   net.ipv4.ip_forward=1
+   net.ipv4.conf.all.src_valid_mark=1
+   net.ipv6.conf.all.disable_ipv6=0
+   net.ipv6.conf.all.forwarding=1
+   net.ipv6.conf.default.forwarding=1
+   EOF
+
+   sysctl --system
+   ```
+
+7. Install Hermes Agent using the standard procedure described on the [official website](https://hermes-agent.nousresearch.com/).
+
 # Important Information Before Deployment
 1. **Supported OS:** The project is designed to run on Ubuntu, Debian, and Arch Linux (7.1.3-arch1-2).
 2. **DNS Configuration:** In the registrar's DNS panel (e.g., Webnames), you must point the primary domain A-record and the wildcard record (`*`) to the internal VPN IP address — **`10.8.0.1`**. This is critical: all traffic to your services must travel inside the secure AmneziaWG tunnel. If you point the domain to the public IP of the VPS, Nginx will block external requests due to the `deny all` rule.
@@ -75,6 +121,7 @@ It is worth clarifying that hosting everything on one powerful VPS would be easi
 5. **wg-easy Configuration:** If there is no connection to the VPN, try accessing the wg-easy interface to adjust settings. (Read more in the [AmneziaWG documentation](https://docs.amnezia.org/documentation/amnezia-wg)).
 6. **Ansible Playbook Errors:** At the beginning of execution, errors might appear when connecting as `root`. If the script does not terminate and deployment is happening on servers that already contain the users specified in `secrets.yml`, this is normal. In this case, the script should proceed by connecting as the created users.
 7. **Reliability Guarantee:** The project's functionality is only guaranteed on completely clean servers, or servers already configured using this project. Otherwise, operation is not guaranteed. Functionality is also not guaranteed in the event of connection issues.
+8. **If DNS requests from the local server can't be seen in AdGuardHome:** You need to do the following: `echo "nameserver 10.8.0.1" | sudo tee /etc/resolv.conf && sudo chattr +i /etc/resolv.conf`.
 
 # Testing with Vagrant
 1. Install:
