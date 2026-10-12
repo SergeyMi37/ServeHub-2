@@ -12,7 +12,7 @@ if [ ! -f "build/bin/gui-installer" ]; then
     wails build -tags webkit2_41
 fi
 
-DEB_DIR="build/debian/servehub-installer"
+DEB_DIR="/tmp/servehub-installer-build"
 rm -rf "$DEB_DIR"
 mkdir -p "$DEB_DIR/DEBIAN"
 mkdir -p "$DEB_DIR/usr/bin"
@@ -44,8 +44,13 @@ Categories=Utility;
 Terminal=false
 EOF
 
+chmod -R 0755 "$DEB_DIR"
+
 echo "==> Упаковка пакета..."
 mkdir -p build/bin
+
 dpkg-deb --root-owner-group --build "$DEB_DIR" build/bin/servehub-installer.deb
+
+rm -rf "$DEB_DIR"
 
 echo "==> Готово! Пакет сохранен в gui-installer/build/bin/servehub-installer.deb"

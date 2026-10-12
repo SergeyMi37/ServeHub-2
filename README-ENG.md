@@ -80,36 +80,31 @@ Hermes is deployed separately from the core ServeHub-2 components and is not req
 
 Hermes's VPN access should be restricted to the IP addresses and ports it actually needs. Connecting to the VPN should not grant the agent unrestricted access to all devices and services.
 
-## Setting Up the Server and Installing Hermes Agent
+## Server Setup for Hermes Agent and Installation
 
-1. Install Docker and Docker Compose.
-2. Install [amneziawg-dkms](https://github.com/amnezia-vpn/amneziawg-linux-kernel-module).
-3. Clone the repository:
+1. Install Docker + Docker Compose
+2. Install amneziawg-dkms: https://github.com/amnezia-vpn/amneziawg-linux-kernel-module
+3. git clone https://github.com/canntstand/ServeHub-2
+4. Download the config and place it at ./apps-data/amnezia/awg0.conf on the server where Hermes will be installed.
+5. Run the commands below:
+    ```bash
+    cat > /etc/sysctl.d/99-servehub-vpn.conf <<'EOF'
+    net.ipv4.ip_forward=1
+    net.ipv4.conf.all.src_valid_mark=1
+    net.ipv6.conf.all.disable_ipv6=0
+    net.ipv6.conf.all.forwarding=1
+    net.ipv6.conf.default.forwarding=1
+    EOF
 
-   ```bash
-   git clone https://github.com/canntstand/ServeHub-2
-   ```
+    sysctl --system
+    ```
 
-4. In wg-easy on the remote server, create a configuration for a new client and place it in `./apps-data/amnezia/awg0.conf`.
-5. Apply the following kernel settings:
-
-   ```bash
-   cat > /etc/sysctl.d/99-servehub-vpn.conf <<'EOF'
-   net.ipv4.ip_forward=1
-   net.ipv4.conf.all.src_valid_mark=1
-   net.ipv6.conf.all.disable_ipv6=0
-   net.ipv6.conf.all.forwarding=1
-   net.ipv6.conf.default.forwarding=1
-   EOF
-
-   sysctl --system
-   ```
 6. Start the VPN client:
+    ```bash
+    docker compose -f docker-compose.hermes.yaml up -d
+    ```
 
-   ```bash
-   docker compose -f docker-compose.hermes.yaml up -d
-   ```
-7. Configure DNS for awg0 interface:
+7. Configure DNS for the awg0 interface:
     ```bash
     cat << 'EOF' | sudo tee /etc/systemd/system/amnezia-dns.service > /dev/null && sudo systemctl daemon-reload && sudo systemctl enable --now amnezia-dns.service
     [Unit]
@@ -128,7 +123,7 @@ Hermes's VPN access should be restricted to the IP addresses and ports it actual
     WantedBy=multi-user.target
     EOF
     ```
-8. Install Hermes Agent using the standard procedure described on the [official website](https://hermes-agent.nousresearch.com/).
+8. Install Hermes Agent using the standard method (official website: https://hermes-agent.nousresearch.com):
 
 # Important Information Before Deployment
 1. **Supported OS:** The project is designed to run on Ubuntu, Debian, and Arch Linux (7.1.3-arch1-2).
@@ -138,6 +133,7 @@ Hermes's VPN access should be restricted to the IP addresses and ports it actual
 5. **wg-easy Configuration:** If there is no connection to the VPN, try accessing the wg-easy interface to adjust settings. (Read more in the [AmneziaWG documentation](https://docs.amnezia.org/documentation/amnezia-wg)).
 6. **Ansible Playbook Errors:** At the beginning of execution, errors might appear when connecting as `root`. If the script does not terminate and deployment is happening on servers that already contain the users specified in `secrets.yml`, this is normal. In this case, the script should proceed by connecting as the created users.
 7. **Reliability Guarantee:** The project's functionality is only guaranteed on completely clean servers, or servers already configured using this project. Otherwise, operation is not guaranteed. Functionality is also not guaranteed in the event of connection issues.
+8. **WG-easy main network interface name:** If the main network interface name on the remote server is not eth0, then in the WG-easy panel you need to change the Device value to the actual interface name of the server.
 
 # Testing with Vagrant
 1. Install:
@@ -160,7 +156,7 @@ Hermes's VPN access should be restricted to the IP addresses and ports it actual
 ## 1. Environmental requirements
 Install dependencies before starting the build:
 - **[Go 1.21+](https://go.dev/doc/install)**
-- **[NPM / Node.js (15+)](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)**
+- **[NPM (PNPM) / Node.js (15+)](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)**
 - **[Wails v2](https://wails.io/docs/gettingstarted/installation)**
 - **libwebkit2gtk-4.1-dev** — *Linux only* (required for Wails rendering engine)
 

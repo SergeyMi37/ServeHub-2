@@ -68,22 +68,23 @@ services:
     container_name: wg-easy
     environment:
       - LANG=en
-      - WG_HOST=${VPS_PUBLIC_IP}
       - PORT=51821
-      - WG_PORT=51820
-      - WG_DEFAULT_ADDRESS=10.8.0.x
-      - INIT_DNS=10.8.0.1
-      - WG_PERSISTENT_KEEPALIVE=25
-      - WG_ALLOWED_IPS=0.0.0.0/0
+      - DISABLE_IPV6=true
+
       - EXPERIMENTAL_AWG=true
       - OVERRIDE_AUTO_AWG=awg
       - INSECURE=true
-      - WG_DEVICE=${VPS_MAIN_INTERFACE}
+
       - INIT_ENABLED=true
       - INIT_USERNAME=${ADMIN_USER}
       - INIT_PASSWORD=${ADMIN_PASSWORD}
       - INIT_HOST=${VPS_PUBLIC_IP}
       - INIT_PORT=51820
+      - INIT_DNS=10.8.0.1
+
+      - INIT_IPV4_CIDR=10.8.0.0/24
+      - INIT_IPV6_CIDR=fdcc:ad94:bacf:61a4::cafe:0/112
+      - INIT_ALLOWED_IPS=10.8.0.0/24
     volumes:
       - ./apps-data/wg-easy:/etc/wireguard
       - /lib/modules:/lib/modules:ro
