@@ -94,7 +94,7 @@ Hermes разворачивается отдельно от основных к�
 4. Скачайте конфиг и поместите по пути `./apps-data/amnezia/awg0.conf` на сервере, где будет установлен Hermes.
 5. Выполнить команды ниже
     ```bash
-    cat > /etc/sysctl.d/99-servehub-vpn.conf <<'EOF'
+    sudo tee /etc/sysctl.d/99-servehub-vpn.conf <<'EOF'
     net.ipv4.ip_forward=1
     net.ipv4.conf.all.src_valid_mark=1
     net.ipv6.conf.all.disable_ipv6=0
@@ -102,7 +102,8 @@ Hermes разворачивается отдельно от основных к�
     net.ipv6.conf.default.forwarding=1
     EOF
 
-    sysctl --system
+
+    sudo sysctl --system
     ```
 6. Запустите VPN клиент:
     ```bash
