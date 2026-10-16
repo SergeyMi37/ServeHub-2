@@ -128,7 +128,7 @@ Hermes разворачивается отдельно от основных к�
     WantedBy=multi-user.target
     EOF
     ```
-8. Установка Hermes Agent стандартным способом (официальный сайт: https://hermes-agent.nousresearch.com)
+8. Установка Hermes Agent стандартным способом, выбор настроек в зависимости от потребностей (официальный сайт: https://hermes-agent.nousresearch.com)
 
 # Важная информация перед развертыванием проекта
 1. **Поддерживаемые ОС:** Проект рассчитан на работу на Ubuntu, Debian, Arch Linux (как минимум 7.1.8-arch1-3).
