@@ -582,7 +582,7 @@ services:
     container_name: homebox
     restart: unless-stopped
     ports:
-      - "7745:7745"
+      - "10.8.0.2:7745:7745"
     environment:
       - HBOX_MODE=production
       - HBOX_WEB_PORT=7745
